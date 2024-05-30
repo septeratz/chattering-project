@@ -3,7 +3,6 @@ import socket from '../socket';
 import UsersList from './UsersList';
 import MessageList from './MessageList';
 import MessageForm from './MessageForm';
-import ChangeNameForm from './ChangeNameForm';
 
 const ChatApp = ({ user, room }) => {
   const [users, setUsers] = useState([]);
@@ -13,42 +12,37 @@ const ChatApp = ({ user, room }) => {
   useEffect(() => {
     socket.emit('joinRoom', { room, user: username });
 
-    socket.on('init', (data) => {
+    const handleInit = (data) => {
       setUsers(data.users);
       setMessages(data.messages);
       if (data.name) {
         setUsername(data.name);
       }
-    });
+    };
 
-    socket.on('send:message', (message) => {
+    const handleSendMessage = (message) => {
       setMessages((messages) => [...messages, message]);
-    });
+    };
 
-    socket.on('user:join', (user) => {
+    const handleUserJoin = (user) => {
       setUsers((users) => [...users, user]);
-    });
+    };
 
-    socket.on('user:left', (user) => {
+    const handleUserLeft = (user) => {
       setUsers((users) => users.filter((u) => u !== user));
-    });
+    };
 
-    socket.on('change:name', ({ oldName, newName }) => {
-      setUsers((users) =>
-        users.map((user) => (user === oldName ? newName : user))
-      );
-      if (username === oldName) {
-        setUsername(newName);
-      }
-    });
+    socket.on('init', handleInit);
+    socket.on('send:message', handleSendMessage);
+    socket.on('user:join', handleUserJoin);
+    socket.on('user:left', handleUserLeft);
 
     return () => {
       socket.emit('leaveRoom', { room, user: username });
-      socket.off('init');
-      socket.off('send:message');
-      socket.off('user:join');
-      socket.off('user:left');
-      socket.off('change:name');
+      socket.off('init', handleInit);
+      socket.off('send:message', handleSendMessage);
+      socket.off('user:join', handleUserJoin);
+      socket.off('user:left', handleUserLeft);
     };
   }, [room, username]);
 
@@ -57,23 +51,9 @@ const ChatApp = ({ user, room }) => {
     setMessages((messages) => [...messages, message]);
   };
 
-  const handleChangeName = (newName) => {
-    const oldName = username;
-    socket.emit('change:name', { oldName, newName }, (result) => {
-      if (!result) {
-        return alert('There was an error changing your name');
-      }
-      setUsers((users) =>
-        users.map((user) => (user === oldName ? newName : user))
-      );
-      setUsername(newName);
-    });
-  };
-
   return (
     <div className='chat-app'>
       <UsersList users={users} />
-      <ChangeNameForm onChangeName={handleChangeName} />
       <MessageList messages={messages} />
       <MessageForm onMessageSubmit={handleMessageSubmit} user={username} />
     </div>
