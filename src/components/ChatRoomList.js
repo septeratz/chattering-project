@@ -10,6 +10,7 @@ import {
   FormControl,
   FormLabel,
   Text,
+  Flex,
 } from '@chakra-ui/react';
 import socket from '../socket';
 
@@ -17,19 +18,35 @@ const ChatRoomList = ({ onSelectRoom }) => {
   const [rooms, setRooms] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [newRoomName, setNewRoomName] = useState('');
+  const [latestMessages, setLatestMessages] = useState({});
 
   useEffect(() => {
     const fetchRooms = () => {
       socket.emit('requestRoomList');
       socket.on('roomList', (rooms) => {
         setRooms(rooms);
+        fetchLatestMessages(rooms);
       });
     };
+
+    const fetchLatestMessages = (rooms) => {
+      rooms.forEach(room => {
+        socket.emit('requestLatestMessage', room);
+      });
+    };
+
+    socket.on('latestMessage', ({ room, message }) => {
+      setLatestMessages(prevState => ({
+        ...prevState,
+        [room]: message,
+      }));
+    });
 
     fetchRooms();
 
     return () => {
       socket.off('roomList');
+      socket.off('latestMessage');
     };
   }, []);
 
@@ -65,7 +82,12 @@ const ChatRoomList = ({ onSelectRoom }) => {
         <List spacing={2} mb={4}>
           {filteredRooms.map((room, index) => (
             <ListItem key={index}>
-              <Button width="100%" onClick={() => onSelectRoom(room)}>{room}</Button>
+              <Button width="100%" onClick={() => onSelectRoom(room)}>
+                <Flex justifyContent="space-between">
+                  <Text>{room}</Text>
+                  <Text fontSize="sm" color="gray.500">{latestMessages[room]?.text || 'No messages yet'}</Text>
+                </Flex>
+              </Button>
             </ListItem>
           ))}
         </List>

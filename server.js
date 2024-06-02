@@ -18,6 +18,7 @@ const io = socketIo(server, {
 
 let users = {};
 let rooms = {};
+let roomMessages = {}; // Store messages for each room
 
 app.post('/signup', (req, res) => {
   const { id, password } = req.body;
@@ -37,85 +38,37 @@ app.post('/login', (req, res) => {
   res.status(200).send('Login successful');
 });
 
-var userNames = (function () {
-  var names = {};
-
-  var claim = function (name) {
-    if (!name || names[name]) {
-      return false;
-    } else {
-      names[name] = true;
-      return true;
-    }
-  };
-
-  var getGuestName = function () {
-    var name,
-      nextUserId = 1;
-
-    do {
-      name = 'Guest ' + nextUserId;
-      nextUserId += 1;
-    } while (!claim(name));
-
-    return name;
-  };
-
-  var get = function () {
-    var res = [];
-    for (let user in names) {
-      res.push(user);
-    }
-
-    return res;
-  };
-
-  var free = function (name) {
-    if (names[name]) {
-      delete names[name];
-    }
-  };
-
-  return {
-    claim: claim,
-    free: free,
-    get: get,
-    getGuestName: getGuestName
-  };
-}());
-
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  var name = userNames.getGuestName();
+  socket.on('requestRoomList', () => {
+    io.emit('roomList', Object.keys(rooms));
+  });
 
-  socket.on('joinRoom', ({ room, user }) => {
-    if (!rooms[room]) {
-      rooms[room] = { users: [], messages: [] };
-    }
-
-    if (!rooms[room].users.includes(user)) {
-      rooms[room].users.push(user);
-      socket.join(room);
-      socket.emit('init', { users: rooms[room].users, messages: rooms[room].messages, name: user });
-      io.to(room).emit('user:join', user);
-      console.log(`${user} joined room: ${room}`);
+  socket.on('createRoom', ({ name }) => {
+    if (!rooms[name]) {
+      rooms[name] = [];
+      roomMessages[name] = []; // Initialize message array for new room
+      io.emit('roomList', Object.keys(rooms));
     }
   });
 
-  socket.on('createRoom', (room) => {
-    if (!rooms[room.name]) {
-      rooms[room.name] = { users: [], messages: [] };
-      io.emit('roomList', Object.keys(rooms));
-      console.log(`Room created: ${room.name}`);
+  socket.on('joinRoom', ({ room, user }) => {
+    if (!rooms[room]) {
+      rooms[room] = [];
+    }
+    if (!rooms[room].includes(user)) {
+      rooms[room].push(user);
+      socket.join(room);
+      io.to(room).emit('user:join', user);
+      io.to(room).emit('init', { users: rooms[room] });
     }
   });
 
   socket.on('leaveRoom', ({ room, user }) => {
     if (rooms[room]) {
-      rooms[room].users = rooms[room].users.filter((u) => u !== user);
+      rooms[room] = rooms[room].filter((u) => u !== user);
       io.to(room).emit('user:left', user);
-      console.log(`${user} left room: ${room}`);
     }
     socket.leave(room);
   });
@@ -123,35 +76,17 @@ io.on('connection', (socket) => {
   socket.on('send:message', ({ room, user, text }) => {
     const message = { user, text };
     if (rooms[room]) {
-      rooms[room].messages.push(message);
+      roomMessages[room].push(message);
       io.to(room).emit('send:message', message);
-      console.log(`Message from ${user} in room ${room}: ${text}`);
     }
   });
 
-  socket.on('change:name', function (data, fn) {
-    if (userNames.claim(data.name)) {
-      var oldName = name;
-      userNames.free(oldName);
-      name = data.name;
-      socket.broadcast.emit('change:name', {
-        oldName: oldName,
-        newName: name
-      });
-      fn(true);
-    } else {
-      fn(false);
-    }
+  socket.on('requestLatestMessage', (room) => {
+    const latestMessage = roomMessages[room] ? roomMessages[room][roomMessages[room].length - 1] : null;
+    socket.emit('latestMessage', { room, message: latestMessage });
   });
 
-  socket.on('disconnect', function () {
-    for (let room in rooms) {
-      if (rooms[room].users.includes(name)) {
-        rooms[room].users = rooms[room].users.filter((u) => u !== name);
-        io.to(room).emit('user:left', name);
-      }
-    }
-    userNames.free(name);
+  socket.on('disconnect', () => {
     console.log('A user disconnected');
   });
 });
