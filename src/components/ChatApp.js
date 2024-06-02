@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Heading,
-  VStack,
-  List,
-  ListItem,
-  Text,
-  Flex
+  Box, Heading, VStack, List, ListItem, Text, Flex
 } from '@chakra-ui/react';
 import socket from '../socket';
 import UsersList from './UsersList';
@@ -55,18 +49,18 @@ const ChatApp = ({ user, room }) => {
   };
 
   return (
-    <Flex p={4} maxW="md" borderWidth={1} borderRadius="lg" overflow="hidden" flexDirection="column">
-      <Heading as="h2" size="lg" mb={4}>Room: {room}</Heading>
-      <Flex flexDirection="row" mb={4}>
-        <Box flex="1">
+    <Flex p={8} maxW="3xl" borderWidth={1} borderRadius="lg" overflow="hidden" flexDirection="column">
+      <Heading as="h2" size="xl" mb={6}>Room: {room}</Heading>
+      <Flex flexDirection="row" mb={6}>
+        <Box flex="1" p={4}>
           <UsersList users={users} />
         </Box>
-        <Box flex="2">
-          <VStack spacing={4} align="stretch">
-            <List spacing={2} maxH="300px" overflowY="scroll">
+        <Box flex="2" p={4}>
+          <VStack spacing={6} align="stretch">
+            <List spacing={4} maxH="400px" overflowY="scroll">
               {messages.map((message, index) => (
                 <ListItem key={index}>
-                  <Text><strong>{message.user}:</strong> {message.text}</Text>
+                  <Text fontSize="lg"><strong>{message.user}:</strong> {message.text}</Text>
                 </ListItem>
               ))}
             </List>

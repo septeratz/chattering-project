@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChakraProvider, Box } from '@chakra-ui/react';
+import { ChakraProvider, Box, Center } from '@chakra-ui/react';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import ChatRoomList from './components/ChatRoomList';
@@ -25,6 +25,7 @@ const App = () => {
   if (!user) {
     return (
       <ChakraProvider>
+        <Center height="100vh">
         <Box>
           {isSignUp ? (
             <SignUp toggleSignUp={handleSignUpToggle} />
@@ -32,12 +33,14 @@ const App = () => {
             <Login onLogin={handleLogin} toggleSignUp={handleSignUpToggle} />
           )}
         </Box>
+        </Center>
       </ChakraProvider>
     );
   }
 
   return (
     <ChakraProvider>
+      <Center height="100vh">
       <Box>
         {!selectedRoom ? (
           <ChatRoomList onSelectRoom={handleSelectRoom} />
@@ -45,6 +48,7 @@ const App = () => {
           <ChatApp user={user} room={selectedRoom} />
         )}
       </Box>
+      </Center>
     </ChakraProvider>
   );
 };

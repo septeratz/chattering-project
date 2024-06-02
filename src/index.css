@@ -1,24 +1,5 @@
 /* Basic styles for the chat app */
-body {
-  font-family: Arial, sans-serif;
-}
-
-.users, .messages, .message_form, .change_name_form {
-  margin: 20px;
-}
-
-.users ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.messages {
-  max-height: 300px;
-  overflow-y: scroll;
-}
-
-.message_form input, .change_name_form input {
-  width: calc(100% - 20px);
-  padding: 10px;
-  margin-top: 10px;
+html, body, #root {
+  height: 100%;
+  margin: 0;
 }

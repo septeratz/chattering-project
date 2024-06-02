@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Heading,
-  Text,
+import {  Box,  Button,  FormControl,  FormLabel,  Input,  Heading,  Text,
 } from '@chakra-ui/react';
 
 const Login = ({ onLogin, toggleSignUp }) => {
@@ -26,33 +19,36 @@ const Login = ({ onLogin, toggleSignUp }) => {
   };
 
   return (
-    <Box p={4} maxW="md" borderWidth={1} borderRadius="lg" overflow="hidden">
-      <Heading as="h2" size="lg" mb={4}>Login</Heading>
+    <Box p={8} maxW="lg" borderWidth={1} borderRadius="lg" overflow="hidden">
+      <Heading as="h2" size="xl" mb={6}>Login</Heading>
       <form onSubmit={handleSubmit}>
-        <FormControl id="id" mb={4}>
-          <FormLabel>ID</FormLabel>
+        <FormControl id="id" mb={6}>
+          <FormLabel fontSize="lg">ID</FormLabel>
           <Input
             type="text"
             value={id}
             onChange={(e) => setId(e.target.value)}
+            size="lg"
           />
         </FormControl>
-        <FormControl id="password" mb={4}>
-          <FormLabel>Password</FormLabel>
+        <FormControl id="password" mb={6}>
+          <FormLabel fontSize="lg">Password</FormLabel>
           <Input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            size="lg"
           />
         </FormControl>
-        <Button type="submit" colorScheme="teal" mb={4}>Login</Button>
-        {error && <Text color="red.500">{error}</Text>}
+        <Button type="submit" colorScheme="teal" size="lg" mb={4}>Login</Button>
+        {error && <Text color="red.500" fontSize="lg">{error}</Text>}
       </form>
-      <Button onClick={toggleSignUp} variant="link" colorScheme="teal">
+      <Button onClick={toggleSignUp} variant="link" colorScheme="teal" size="lg">
         Sign Up
       </Button>
     </Box>
   );
 };
+
 
 export default Login;
