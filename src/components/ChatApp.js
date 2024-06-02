@@ -1,62 +1,54 @@
 import React, { useState, useEffect } from 'react';
+import { Box } from '@chakra-ui/react';
 import socket from '../socket';
 import UsersList from './UsersList';
 import MessageList from './MessageList';
 import MessageForm from './MessageForm';
 
-const ChatApp = ({ user, room }) => {
+const ChatApp = () => {
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [username, setUsername] = useState(user);
+  const [user, setUser] = useState('');
 
   useEffect(() => {
-    socket.emit('joinRoom', { room, user: username });
-
-    const handleInit = (data) => {
-      setUsers(data.users);
-      setMessages(data.messages);
-      if (data.name) {
-        setUsername(data.name);
-      }
-    };
-
-    const handleSendMessage = (message) => {
-      setMessages((messages) => [...messages, message]);
-    };
-
-    const handleUserJoin = (user) => {
-      setUsers((users) => [...users, user]);
-    };
-
-    const handleUserLeft = (user) => {
-      setUsers((users) => users.filter((u) => u !== user));
-    };
-
-    socket.on('init', handleInit);
-    socket.on('send:message', handleSendMessage);
-    socket.on('user:join', handleUserJoin);
-    socket.on('user:left', handleUserLeft);
+    socket.on('init', ({ users, name }) => {
+      setUsers(users);
+      setUser(name);
+    });
+    socket.on('send:message', (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+    socket.on('user:join', (user) => {
+      setUsers((prevUsers) => [...prevUsers, user]);
+    });
+    socket.on('user:left', (user) => {
+      setUsers((prevUsers) => prevUsers.filter((u) => u !== user));
+    });
+    socket.on('change:name', ({ oldName, newName }) => {
+      setUsers((prevUsers) => prevUsers.map((user) => (user === oldName ? newName : user)));
+    });
 
     return () => {
-      socket.emit('leaveRoom', { room, user: username });
-      socket.off('init', handleInit);
-      socket.off('send:message', handleSendMessage);
-      socket.off('user:join', handleUserJoin);
-      socket.off('user:left', handleUserLeft);
+      socket.off('init');
+      socket.off('send:message');
+      socket.off('user:join');
+      socket.off('user:left');
+      socket.off('change:name');
     };
-  }, [room, username]);
+  }, []);
 
   const handleMessageSubmit = (message) => {
-    socket.emit('send:message', { ...message, room });
-    setMessages((messages) => [...messages, message]);
+    setMessages((prevMessages) => [...prevMessages, message]);
+    socket.emit('send:message', message);
   };
 
+
   return (
-    <div className='chat-app'>
+    <Box>
       <UsersList users={users} />
       <MessageList messages={messages} />
-      <MessageForm onMessageSubmit={handleMessageSubmit} user={username} />
-    </div>
+      <MessageForm onMessageSubmit={handleMessageSubmit} user={user} />
+    </Box>
   );
 };
 

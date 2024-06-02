@@ -10,8 +10,13 @@
     "server": "node server.js"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "axios": "^1.7.2",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "framer-motion": "^11.2.10",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "^5.0.1",

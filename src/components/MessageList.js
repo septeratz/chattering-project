@@ -1,15 +1,16 @@
 import React from 'react';
+import { Box, Heading, VStack } from '@chakra-ui/react';
 import Message from './Message';
 
-const MessageList = ({ messages }) => {
-  return (
-    <div className='messages'>
-      <h2> 채팅방 </h2>
+const MessageList = ({ messages }) => (
+  <Box>
+    <Heading as="h2" size="lg" mb={4}>채팅방</Heading>
+    <VStack spacing={4} align="stretch">
       {messages.map((message, i) => (
         <Message key={i} user={message.user} text={message.text} />
       ))}
-    </div>
-  );
-};
+    </VStack>
+  </Box>
+);
 
 export default MessageList;

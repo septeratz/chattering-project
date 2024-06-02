@@ -1,16 +1,15 @@
 import React from 'react';
+import { Box, Heading, UnorderedList, ListItem } from '@chakra-ui/react';
 
-const UsersList = ({ users }) => {
-  return (
-    <div className='users'>
-      <h3> 참여자들 </h3>
-      <ul>
-        {users.map((user, i) => (
-          <li key={i}>{user}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+const UsersList = ({ users }) => (
+  <Box>
+    <Heading as="h3" size="lg" mb={4}>참여자들</Heading>
+    <UnorderedList>
+      {users.map((user, i) => (
+        <ListItem key={i}>{user}</ListItem>
+      ))}
+    </UnorderedList>
+  </Box>
+);
 
 export default UsersList;

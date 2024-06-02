@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Box, Button, FormControl, Input } from '@chakra-ui/react';
 
-const MessageForm = ({ onMessageSubmit, user }) => {
+const MessageForm = ({ user, onMessageSubmit }) => {
   const [text, setText] = useState('');
 
   const handleSubmit = (e) => {
@@ -10,18 +11,24 @@ const MessageForm = ({ onMessageSubmit, user }) => {
     setText('');
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      handleSubmit(e);
+    }
+  };
+
   return (
-    <div className='message_form'>
-      <form onSubmit={handleSubmit}>
-        <input
+    <Box as="form" onSubmit={handleSubmit}>
+      <FormControl mb={4}>
+        <Input
           placeholder='메시지 입력'
-          className='textinput'
-          onChange={(e) => setText(e.target.value)}
           value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
-        <button type="submit">Send</button>
-      </form>
-    </div>
+      </FormControl>
+      <Button type="submit" colorScheme="teal">Send</Button>
+    </Box>
   );
 };
 

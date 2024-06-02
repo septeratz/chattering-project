@@ -2,9 +2,11 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
 
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -14,7 +16,26 @@ const io = socketIo(server, {
   }
 });
 
+let users = {};
 let rooms = {};
+
+app.post('/signup', (req, res) => {
+  const { id, password } = req.body;
+  if (users[id]) {
+    return res.status(400).send('User already exists');
+  }
+  users[id] = { id, password };
+  res.status(201).send('User created');
+});
+
+app.post('/login', (req, res) => {
+  const { id, password } = req.body;
+  const user = users[id];
+  if (!user || user.password !== password) {
+    return res.status(401).send('Invalid credentials');
+  }
+  res.status(200).send('Login successful');
+});
 
 var userNames = (function () {
   var names = {};
