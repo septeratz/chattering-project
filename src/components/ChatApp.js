@@ -44,8 +44,10 @@ const ChatApp = ({ user, room }) => {
   }, [room, user]);
 
   const handleMessageSubmit = (message) => {
+    // The server broadcasts the message back to every socket in the room,
+    // including the sender. Add it to state only in handleReceiveMessage
+    // so the sender does not render the same message twice.
     socket.emit('send:message', { room, user, text: message.text });
-    setMessages((prevMessages) => [...prevMessages, message]);
   };
 
   return (
